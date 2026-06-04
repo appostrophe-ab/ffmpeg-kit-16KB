@@ -11,6 +11,87 @@ NDK : <a href="https://ci.android.com/builds/branches/aosp-ndk-release-r23/grid"
 You can find all details related to this update here. https://developer.android.com/guide/practices/page-sizes
 </br>
 
+## Android build used by SCRL
+
+This fork is currently used to build the custom Android `ffmpeg-kit.aar` for SCRL with 16KB page-size support.
+
+### Prerequisites
+
+Use a macOS or Linux host. On macOS, initialise Homebrew and install the required tools:
+
+```bash
+eval "$(/usr/local/bin/brew shellenv)"
+brew install pkg-config
+```
+
+On a clean build machine, the wider FFmpegKit toolchain may also be required:
+
+```bash
+brew install autoconf automake libtool nasm cmake gcc gettext groff meson ninja wget gtkdocize gtk-doc bison flex texinfo libtasn1
+```
+
+Install:
+
+- Android SDK
+- Android NDK r25 with 16KB page-size support
+- Java 17
+- Android SDK CMake
+
+Set the build environment. Replace the placeholder paths with local install paths:
+
+```bash
+export CMAKE_POLICY_VERSION_MINIMUM=3.5
+export ANDROID_SDK_ROOT="<path-to-android-sdk>"
+export ANDROID_NDK_ROOT="<path-to-android-ndk-r25>"
+export JAVA_HOME="<path-to-java-17>"
+export PATH="<path-to-android-sdk>/cmake/<cmake-version>/bin:${PATH}"
+```
+
+### Build command
+
+The SCRL Android AAR was built with:
+
+```bash
+./android.sh --api-level=24 --enable-android-media-codec --enable-android-zlib --enable-libwebp --enable-libaom --enable-dav1d
+```
+
+This builds the default Android ABI set:
+
+- `arm-v7a`
+- `arm-v7a-neon`
+- `arm64-v8a`
+- `x86`
+- `x86-64`
+
+To build only the main device ABIs and skip emulator/x86 outputs:
+
+```bash
+./android.sh --api-level=24 --enable-android-media-codec --enable-android-zlib --enable-libwebp --enable-libaom --enable-dav1d --disable-x86 --disable-x86-64 --disable-arm-v7a-neon
+```
+
+### Output
+
+On success, the Android AAR is written to:
+
+```text
+prebuilt/bundle-android-aar/ffmpeg-kit/ffmpeg-kit.aar
+```
+
+For SCRL, copy that file into:
+
+```text
+<scrl-android>/app/libs/ffmpeg-kit.aar
+```
+
+### Android compatibility fixes in this fork
+
+The Android build includes local compatibility fixes for:
+
+- FFmpeg `n7.1.1`
+- FFmpeg 7 `libavutil/emms.h` header location
+- Android x86-64 FFmpeg CPU name (`x86-64`, not `x86_64`)
+- `string.h` includes required by newer clang
+
 # FFmpegKit ![GitHub release](https://img.shields.io/badge/release-v6.0-blue.svg) ![Maven Central](https://img.shields.io/maven-central/v/com.arthenica/ffmpeg-kit-min) ![CocoaPods](https://img.shields.io/cocoapods/v/ffmpeg-kit-ios-min) ![pub](https://img.shields.io/pub/v/ffmpeg_kit_flutter.svg) ![npm](https://img.shields.io/npm/v/ffmpeg-kit-react-native.svg)
 
 ## Notice
